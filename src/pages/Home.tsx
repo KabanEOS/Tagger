@@ -1,5 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { TagPresenter } from '../components/tagPresenter';
+import { TagTable } from '../components/tagTable';
 import { Tag, XTag } from '../models/Tag.model';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCirclePlay, faCircleXmark } from '@fortawesome/free-solid-svg-icons'
+
+
 
 const baseTags: Tag[] = [
   { id: 1, name: "Tag 1", XTag: { xc: 100, xi: 100, xv: 100 }, rating: 0 },
@@ -13,6 +19,20 @@ const baseTags: Tag[] = [
 function Home() {
 
   const [tags, setTags] = useState<Tag[]>(baseTags);
+  const [isTableView, setIsTableView] = useState<boolean>(true);
+
+  const [randomArray, setRandomArray] = useState<number[]>([]);
+  console.log('randomArray', randomArray);
+
+  useEffect(() => {
+    setRandomArrayHandler();
+  }, []);
+
+  const setRandomArrayHandler = () => {
+    const randomArray = Array.from({ length: tags.length - 1 }, (_, i) => i + 1).sort(() => Math.random() - 0.5);
+    setRandomArray(randomArray);
+  };
+
 
   const [myXMulti, setMyXMulti] = useState<XTag>({ xc: 50, xi: 50, xv: 50 });
 
@@ -22,7 +42,7 @@ function Home() {
     calculateRating();
   };
 
-  const handleTagXInputChange = (e: React.ChangeEvent<HTMLInputElement>, tag: Tag, index: number) => {
+  const handleTagXInputChange = (e: React.ChangeEvent<HTMLInputElement>, tag: Tag) => {
 
     const { name, value } = e.target;
     const newTags = [...tags];
@@ -69,7 +89,11 @@ function Home() {
     setTags([...tags].sort((a, b) => b.rating - a.rating));
   }
 
+  useEffect(() => {
+    sortByRating();
+  }, [isTableView]);
 
+  console.log('isTableView', isTableView);
 
   return (
     <div className="mainWrapper">
@@ -129,7 +153,7 @@ function Home() {
       <div>
         <h4 className="addTag">Add new tag</h4>
         <form
-
+          style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}
           onSubmit={(e) => {
             e.preventDefault();
             const newTag = {
@@ -139,18 +163,20 @@ function Home() {
               XTag: { xc: 0, xi: 0, xv: 0 },
               rating: 0,
             };
-            setTags([...tags, newTag]);
+            setTags([newTag, ...tags]);
+            setRandomArrayHandler();
           }}
         >
           {/* create input with id name on change if this input check all other tag names which contains the same letters add to setTagWithSameName if not delete*/}
           <input
             id="name"
             type="text"
+            placeholder="new tag name"
             onChange={(e) => {
               setNewTagNameToCompare(e.target.value);
             }}
           />
-          <button type="submit">Add</button>
+          <button className="button" type="submit">Add</button>
 
         </form>
       </div>
@@ -169,83 +195,51 @@ function Home() {
         {/* sort n filter area */}
         <div className="sortFilterWrapper">
           <div className="sortWrapper">
-            <button className="sortButton" onClick={sortByName}> Sort by name </button>
-            <button className="sortButton" onClick={sortByRating}> Sort by rating </button>
+            <button className="sortButton button" onClick={sortByName}> Sort by name </button>
+            <button className="sortButton button" style={{ backgroundColor: "#FF8787" }} onClick={sortByRating}> Sort by rating </button>
           </div>
 
           <input
             type="text"
-            placeholder="Filter tags by name"
+            placeholder="filter tags by name"
             value={tagToCompare}
             onChange={(e) => setTagToCompare(e.target.value)}
           />
         </div>
 
       </div>
+      <div className={isTableView ? "playPauseButton fadeIn" : "playPauseButton fadeOut"} onClick={() => setIsTableView(!isTableView)}>
+        {/* font awesome icon */}
+        {isTableView ?
+          <FontAwesomeIcon
+            style={{ width: '70px', height: '70px' }} icon={faCirclePlay} />
+          :
+          <FontAwesomeIcon
+            style={{ width: '70px', height: '70px' }} icon={faCircleXmark} />
+        }
+      </div>
       <div>
-        {/* create a table to display the tags */}
-        <div className="tableWrapper">
-          <table style={{ backgroundColor: '#EBEBEB' }}>
-            <thead>
-              <tr>
-                <th style={{ width: '50px', color: '#47474A', textAlign: 'left' }}>Id</th>
-                <th style={{ color: '#3C92E1', width: 'auto' }}>Name</th>
-                <th style={{ color: '#FEAC31' }}>Rating</th>
-                <th>Catchy</th>
-                <th>Interesting</th>
-                <th>Important</th>
-              </tr>
-            </thead>
-            <tbody>
-              {/* eslint-disable-next-line array-callback-return */}
-              {tags.filter((tag) => {
-                if (tagToCompare === "") {
-                  return tag
-                } else if (tag.name.toLowerCase().includes(tagToCompare.toLowerCase())) {
-                  return tag
-                }
-              }).map((tag, index) => (
-                <tr key={tag.id}>
-                  <td style={{ width: '50px', color: '#47474A', textAlign: 'left' }}>{tag.id}</td>
-                  <td style={{ color: '#3C92E1', width: '300px' }}>{tag.name}</td>
-                  <td style={{ color: '#FEAC31' }}>{Math.round(tag.rating)}</td>
-                  <td className="mainTableRow">
-                    <input
-                      name={"xc"}
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={tag.XTag.xc}
-                      onChange={(e) => handleTagXInputChange(e, tag, index)}
-                    /></td>
-                  <td className="mainTableRow">
-                    <input
-                      name={"xi"}
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={tag.XTag.xi}
-                      onChange={(e) => handleTagXInputChange(e, tag, index)}
-                    /></td>
-                  <td className="mainTableRow">
-                    <input
-                      name={"xv"}
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={tag.XTag.xv}
-                      onChange={(e) => handleTagXInputChange(e, tag, index)}
-                    /></td>
-                </tr>
-              ))}
+        {isTableView ?
+          <TagTable
+            tags={tags.filter((tag) => tag.name.toLowerCase().includes(tagToCompare.toLowerCase()))}
+            handleTagXInputChange={handleTagXInputChange}
+            isTableView={isTableView}
+          />
+          :
 
-            </tbody>
-          </table>
-        </div>
+          <TagPresenter
+            tags={tags}
+            handleTagXInputChange={handleTagXInputChange}
+            onClose={() => setIsTableView(false)}
+            isTableView={isTableView}
+            randomArray={randomArray}
+          />
+        }
       </div>
     </div >
 
   );
 }
+
 
 export default Home;
