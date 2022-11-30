@@ -26,6 +26,7 @@ function Home() {
 
   useEffect(() => {
     setRandomArrayHandler();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setRandomArrayHandler = () => {
@@ -91,6 +92,7 @@ function Home() {
 
   useEffect(() => {
     sortByRating();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTableView]);
 
   console.log('isTableView', isTableView);
