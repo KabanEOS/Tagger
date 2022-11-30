@@ -1,5 +1,5 @@
 import React from 'react';
-import { FunctionComponent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 

@@ -197,6 +197,7 @@ function Home() {
               </tr>
             </thead>
             <tbody>
+              {/* eslint-disable-next-line array-callback-return */}
               {tags.filter((tag) => {
                 if (tagToCompare === "") {
                   return tag
